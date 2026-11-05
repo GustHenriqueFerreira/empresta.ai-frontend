@@ -1,7 +1,7 @@
 # EMPREST.AI — Frontend
 
 Interface React, Vite e TypeScript com design Nocturne. Consome a API NestJS do
-repositório [backend](https://github.com/GustHenriqueFerreira/empresta.ai).
+repositório [backend](https://github.com/GustHenriqueFerreira/empresta.ai-backend).
 
 ## Executar
 
@@ -33,4 +33,4 @@ ajuste o CORS do backend para a origem pública do frontend ao publicar.
 Nunca coloque senha PostgreSQL ou chave de serviço no frontend.
 
 Login, catálogo, solicitações, devoluções, Operações e cadastro usam dados reais;
-não há conta ou catálogo de demonstração. Catálogo começa vazio até o cadastro.
+o ambiente hospedado recebeu uma conta e quatro equipamentos de demonstração. Um banco novo começa vazio até o cadastro. Credenciais não são distribuídas neste repositório.
