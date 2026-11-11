@@ -34,7 +34,9 @@ export default function Dialog({
   useEffect(() => {
     if (!aberto) return
     const anterior = document.activeElement as HTMLElement | null
-    dialog.current?.querySelector<HTMLElement>('button:not(:disabled)')?.focus()
+    const primeiroBotao = dialog.current?.querySelector<HTMLElement>('button:not(:disabled)')
+    if (primeiroBotao) primeiroBotao.focus()
+    else dialog.current?.focus()
     function teclado(e: KeyboardEvent) {
       if (e.key === 'Escape' && !ocupado) onFechar()
       if (e.key !== 'Tab') return
@@ -55,7 +57,7 @@ export default function Dialog({
 
   return (
     <div className="backdrop" onClick={aoClicarFora}>
-      <div ref={dialog} className="dialog" role="dialog" aria-modal="true" aria-busy={ocupado} aria-labelledby="dialog-title">
+      <div ref={dialog} tabIndex={-1} className="dialog" role="dialog" aria-modal="true" aria-busy={ocupado} aria-labelledby="dialog-title">
         <h2 className="dialog-title" id="dialog-title">
           {titulo}
         </h2>

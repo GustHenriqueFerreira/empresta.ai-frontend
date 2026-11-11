@@ -113,7 +113,10 @@ export default function App() {
       notify(typeof sucesso === 'function' ? sucesso(resultado) : sucesso)
       await carregar()
     } catch (e) {
-      notify(mensagemErro(e))
+      if (e instanceof ApiError && e.status === 0) {
+        await carregar()
+        notify('Não foi possível confirmar a operação. Confira os dados atualizados antes de tentar novamente.')
+      } else notify(mensagemErro(e))
       if (e instanceof ApiError && e.status === 401) await supabase?.auth.signOut({ scope: 'local' })
       throw e
     }
@@ -127,7 +130,7 @@ export default function App() {
   else conteudo = <>
     <NavBar papel={usuario.papel} abaAtiva={aba} usuario={usuario} onAba={setAba} onSair={() => void sair()} />
     {carregando ? <main className="page" role="status">Carregando…</main> : erro ? <main className="page page-body"><p role="alert">{erro}</p><button className="btn btn-primary" onClick={() => void carregar()}>Tentar novamente</button></main> :
-      aba === 'catalogo' ? <Catalogo itens={itens} onMeus={() => setAba('meus')} onSolicitar={id => alterar(() => api<Emprestimo>('/emprestimos', { equipamentoId: id }), r => `Empréstimo registrado. Devolva até ${dataExibicao(r.devolver_ate)}.`)} /> :
+      aba === 'catalogo' ? <Catalogo itens={itens} emprestimos={meus} onMeus={() => setAba('meus')} onSolicitar={id => alterar(() => api<Emprestimo>('/emprestimos', { equipamentoId: id }), r => `Empréstimo registrado. Devolva até ${dataExibicao(r.devolver_ate)}.`)} /> :
       aba === 'meus' ? <MeusEmprestimos emprestimos={meus} onCatalogo={() => setAba('catalogo')} onDevolver={id => alterar(() => api(`/emprestimos/${id}/devolucao`, {}), 'Devolução registrada.')} /> :
       aba === 'operacoes' && operacoes ? <PainelOperacoes dados={operacoes} onCadastrar={() => setAba('equipamentos')} onDevolver={id => alterar(() => api(`/emprestimos/${id}/devolucao`, {}), 'Devolução registrada.')} /> :
       aba === 'equipamentos' && usuario.papel === 'operacoes' ? <CadastroEquipamento onCancelar={() => setAba('operacoes')} onNotify={notify} onSalvar={async (dados: Cadastro) => { await alterar(() => api('/equipamentos', dados), 'Equipamento cadastrado.'); setAba('operacoes') }} /> : null}

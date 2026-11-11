@@ -4,6 +4,7 @@ export interface Equipamento {
   id: string; nome: string; categoria: string; patrimonio: string
   situacao: 'disponivel' | 'emprestado' | 'manutencao'
   observacoes?: string | null; comigo?: boolean; devolverAte?: string; emAtraso?: boolean
+  imagem?: { url: string; autor: string; pagina: string; fornecedor: 'pixabay'; licenca: string; largura: number; altura: number; ilustrativa: boolean } | null
 }
 export interface Emprestimo {
   id: string; equipamento: Equipamento; retirado_em: string; devolver_ate: string

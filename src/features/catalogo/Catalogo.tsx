@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import type { ChangeEvent, ReactNode } from 'react'
 import Dialog from '../../components/Dialog'
 import { dataExibicao } from '../../utils/datas'
-import type { Equipamento } from '../../types'
+import type { Equipamento, Emprestimo } from '../../types'
 import { prazoPadrao } from '../../utils/datas'
 import './Catalogo.css'
+import ImagemEquipamento from './ImagemEquipamento'
 
 type Filtro = 'todos' | 'disponiveis' | 'emprestados' | 'manutencao'
 
@@ -61,6 +62,7 @@ function Card({ item, bloqueio, onSolicitar }: CardProps) {
 
   return (
     <article className="card">
+      <ImagemEquipamento item={item} />
       <div className="card-top">
         <span className="kicker">{item.categoria}</span>
         <span className={`pill pill-${item.situacao}`}>
@@ -80,12 +82,13 @@ function Card({ item, bloqueio, onSolicitar }: CardProps) {
 }
 
 /* Tela de Catálogo — layout.md §5.2; interações e regras em §7. */
-export default function Catalogo({ itens, onSolicitar, onMeus }: { itens: Equipamento[]; onSolicitar: (id: string) => Promise<void>; onMeus: () => void }) {
+export default function Catalogo({ itens, emprestimos, onSolicitar, onMeus }: { itens: Equipamento[]; emprestimos: Emprestimo[]; onSolicitar: (id: string) => Promise<void>; onMeus: () => void }) {
   const [busca, setBusca] = useState('')
   const [filtro, setFiltro] = useState<Filtro>('todos')
   const [pendente, setPendente] = useState<Equipamento | null>(null)
 
-  const meus = itens.filter((item) => item.comigo)
+  // A elegibilidade considera também itens históricos fora do conjunto de fotos.
+  const meus = emprestimos
   const emAtraso = meus.some((item) => item.emAtraso)
   const disponiveis = itens.filter((item) => item.situacao === 'disponivel').length
 
@@ -115,12 +118,14 @@ export default function Catalogo({ itens, onSolicitar, onMeus }: { itens: Equipa
   }, [itens, busca, filtro])
 
   const [enviando, setEnviando] = useState(false)
+  const envioAtual = useRef(false)
   async function confirmarSolicitacao() {
-    if (!pendente || enviando) return
+    if (!pendente || envioAtual.current) return
+    envioAtual.current = true
     setEnviando(true)
     try { await onSolicitar(pendente.id); setPendente(null) }
     catch { /* A mensagem é exibida pelo app; manter modal para nova tentativa. */ }
-    finally { setEnviando(false) }
+    finally { envioAtual.current = false; setEnviando(false) }
   }
   return (
     <>
@@ -132,6 +137,7 @@ export default function Catalogo({ itens, onSolicitar, onMeus }: { itens: Equipa
               <p className="lead">
                 {disponiveis} de {itens.length} equipamentos disponíveis agora
               </p>
+              <p className="photo-credit">Fotos: <a href="https://pixabay.com/" target="_blank" rel="noopener noreferrer">Pixabay</a></p>
             </div>
             <div className="search">
               <input
